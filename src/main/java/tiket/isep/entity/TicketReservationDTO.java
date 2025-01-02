@@ -4,8 +4,8 @@ import lombok.Data;
 
 @Data
 public class TicketReservationDTO {
-    private String username;
+    private String nomComplete;
     private String phone;
     private Integer quantity;
-    private Integer ticketId;
+    private String name;
 }

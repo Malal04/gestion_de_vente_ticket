@@ -8,6 +8,6 @@ public class TicketDTO {
     private String name;
     private Integer price;
     private String image;
-    private Integer userId;
-    private Integer categoryId;
+//    private Integer categoryId;
+    private String categoryName;
 }

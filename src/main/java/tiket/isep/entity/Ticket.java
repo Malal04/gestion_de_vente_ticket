@@ -2,6 +2,7 @@ package tiket.isep.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import tiket.isep.users.models.entities.User;
 
 @Data
 @Builder
@@ -18,6 +19,7 @@ public class Ticket {
 
     private Integer price;
 
+    @Column(length = 200000000)
     private String image;
 
     private Integer stockQuantity;

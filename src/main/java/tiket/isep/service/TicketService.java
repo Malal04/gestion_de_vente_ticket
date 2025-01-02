@@ -2,10 +2,12 @@ package tiket.isep.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tiket.isep.entity.*;
 import tiket.isep.reposity.CategoryRepository;
 import tiket.isep.reposity.TicketRepository;
-import tiket.isep.reposity.UserRepository;
+import tiket.isep.users.models.entities.User;
+import tiket.isep.users.repositories.UserRepository;
 
 import java.util.List;
 
@@ -20,7 +22,7 @@ public class TicketService {
     private final CategoryRepository categoryRepository;
 
     public Ticket createTicket(TicketDTO ticketDTO) {
-        Category category = categoryRepository.findById(ticketDTO.getCategoryId())
+        Category category = categoryRepository.findByName(ticketDTO.getCategoryName())
                 .orElseThrow(() -> new IllegalArgumentException("Catégorie non trouvée"));
 
         Ticket ticket = new Ticket(ticketDTO.getName(), 1000, ticketDTO.getImage(), 80);
@@ -28,16 +30,20 @@ public class TicketService {
         return ticketRepository.save(ticket);
     }
 
+    public Category createCategory(Category category) {
+        return categoryRepository.save(category);
+    }
+
     public Ticket reserveTickets(TicketReservationDTO reservationDTO) {
         if (reservationDTO.getQuantity() > 3) {
             throw new IllegalArgumentException("Vous ne pouvez réserver que 3 tickets à la fois.");
         }
 
-        User user = userRepository.findByUsername(reservationDTO.getUsername())
+        User user = userRepository.findByNomComplete(reservationDTO.getNomComplete())
                 .orElseGet(() -> {
                     User newUser = new User();
-                    newUser.setUsername(reservationDTO.getUsername());
-                    newUser.setPhone(reservationDTO.getPhone());
+                    newUser.setNomComplete(reservationDTO.getNomComplete());
+                    newUser.setTelephone(reservationDTO.getPhone());
                     return userRepository.save(newUser);
                 });
 
@@ -45,7 +51,7 @@ public class TicketService {
             throw new IllegalArgumentException("Vous avez déjà réservé des tickets.");
         }
 
-        Ticket ticket = ticketRepository.findById(reservationDTO.getTicketId())
+        Ticket ticket = ticketRepository.findByName(reservationDTO.getName())
                 .orElseThrow(() -> new IllegalArgumentException("Ticket non trouvé"));
 
         if (ticket.getStockQuantity() < reservationDTO.getQuantity()) {
@@ -59,9 +65,12 @@ public class TicketService {
         return ticketRepository.save(ticket);
     }
 
-
     public List<Ticket> getAllTickets() {
         return ticketRepository.findAll();
+    }
+
+    public List<Category> getTicketsByCategory(Category category) {
+        return categoryRepository.findAll();
     }
 
     public TicketDetailDTO getTicketDetails(Integer ticketId) {
@@ -77,5 +86,22 @@ public class TicketService {
         );
     }
 
+    @Transactional
+    public boolean deleteTicket(Integer id) {
+        if (ticketRepository.existsById(id)) {
+            ticketRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+
+    @Transactional
+    public boolean deleteCategories(Integer id) {
+        if (categoryRepository.existsById(id)) {
+            categoryRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
 
 }
